@@ -9,7 +9,7 @@ internal static class ConfirmDialog
             Text = title, Font = owner.Font, BackColor = owner.BackColor, ForeColor = owner.ForeColor,
             AutoScaleMode = AutoScaleMode.Dpi, FormBorderStyle = FormBorderStyle.FixedDialog,
             StartPosition = FormStartPosition.CenterParent, MinimizeBox = false, MaximizeBox = false,
-            ClientSize = new Size(440, 230)
+            ClientSize = new Size(440, Math.Max(230, TextRenderer.MeasureText(message, owner.Font, new Size(380, int.MaxValue), TextFormatFlags.WordBreak).Height + 110))
         };
         var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), RowCount = 2, ColumnCount = 1 };
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
