@@ -13,8 +13,11 @@ $data = Join-Path $env:ProgramData 'WifiProfileSwitcher'
 if ((Test-Path -LiteralPath $installed) -or (Test-Path -LiteralPath $data) -or (Get-Service WifiProfileSwitcher -ErrorAction SilentlyContinue)) {
     throw 'Refusing to test over an existing installation.'
 }
-$script:answer = 'INSTALL'
-function Read-Host { param([string]$Prompt) return $script:answer }
+function Read-Host {
+    param([string]$Prompt)
+    if ($Prompt -match '\b(INSTALL|CONFIGURE|UNINSTALL)\b') { return $Matches[1] }
+    throw 'Unexpected confirmation; this test must never enable network writes.'
+}
 try {
     & (Join-Path $package 'scripts\install.ps1') -ConfigPath (Join-Path $package 'config.example.json')
     if ($LASTEXITCODE -ne 0) { throw 'Install failed' }
@@ -40,7 +43,6 @@ try {
     & $exe status
     if ($LASTEXITCODE -ne 0) { throw 'Status failed' }
     Stop-Service WifiProfileSwitcher
-    $script:answer = 'CONFIGURE'
     & (Join-Path $installed 'scripts\configure.ps1') -ConfigPath (Join-Path $package 'config.example.json')
     if ($LASTEXITCODE -ne 0) { throw 'Configure failed' }
     if ((Get-Service WifiProfileSwitcher).Status -ne 'Stopped') { throw 'Configure must preserve stopped service' }
@@ -53,7 +55,6 @@ try {
         throw 'Invalid configuration did not preserve the previous file'
     }
     Remove-Item -LiteralPath $badConfig
-    $script:answer = 'UNINSTALL'
     & (Join-Path $installed 'scripts\uninstall.ps1')
     if ($LASTEXITCODE -ne 0) { throw 'Uninstall failed' }
     if ((Test-Path -LiteralPath $installed) -or (Test-Path -LiteralPath $data) -or (Get-Service WifiProfileSwitcher -ErrorAction SilentlyContinue)) {

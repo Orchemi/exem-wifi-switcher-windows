@@ -28,11 +28,19 @@ try {
     foreach ($name in @('TESTING.md', 'PERMISSIONS.md')) {
         Copy-Item -LiteralPath (Join-Path $root "docs/$name") -Destination (Join-Path $destination 'docs')
     }
+    # Redistribute the runtime's own notices alongside its binaries.
+    $runtimeConfig = Get-Content -LiteralPath (Join-Path $destination 'WifiProfileSwitcher.runtimeconfig.json') -Raw | ConvertFrom-Json
+    $runtimeVersion = @($runtimeConfig.runtimeOptions.includedFrameworks | Where-Object { $_.name -eq 'Microsoft.NETCore.App' })[0].version
+    $cache = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path ([Environment]::GetFolderPath('UserProfile')) '.nuget/packages' }
+    $runtimePackage = Join-Path $cache "microsoft.netcore.app.runtime.$Runtime/$runtimeVersion"
+    Copy-Item -LiteralPath (Join-Path $runtimePackage 'LICENSE.TXT') -Destination (Join-Path $destination 'DOTNET-LICENSE.txt')
+    Copy-Item -LiteralPath (Join-Path $runtimePackage 'THIRD-PARTY-NOTICES.TXT') -Destination (Join-Path $destination 'THIRD-PARTY-NOTICES.txt')
+    [IO.File]::WriteAllText((Join-Path $destination 'WINDOWS-SDK-NOTICE.txt'), "Microsoft.Windows.SDK.NET and WinRT runtime components`nCopyright Microsoft Corporation. All rights reserved.`nWindows SDK terms: https://aka.ms/WinSDKLicenseURL`nC#/WinRT: https://github.com/microsoft/CsWinRT/blob/master/LICENSE`n", [Text.UTF8Encoding]::new($false))
     $forbidden = @(Get-ChildItem -LiteralPath $destination -Recurse -File | Where-Object {
         $_.Name -in @('config.json', 'snapshot.json', 'status.json', '.DS_Store') -or $_.Extension -in @('.pdb', '.log', '.pfx', '.key')
     })
     if ($forbidden.Count) { throw 'Forbidden package content' }
-    foreach ($textFile in @(Get-ChildItem -LiteralPath $destination -Recurse -File | Where-Object { $_.Extension -in @('.json', '.md', '.ps1') })) {
+    foreach ($textFile in @(Get-ChildItem -LiteralPath $destination -Recurse -File | Where-Object { $_.Extension -in @('.json', '.md', '.ps1', '.txt') })) {
         $content = [IO.File]::ReadAllText($textFile.FullName)
         # Generated dependency metadata contains framework versions, never user settings.
         if ($textFile.Name -like '*.deps.json' -or $textFile.Name -like '*.runtimeconfig.json') {
