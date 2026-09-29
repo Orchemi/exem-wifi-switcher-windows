@@ -3,7 +3,8 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$ConfigPath,
-    [switch]$Enable
+    [switch]$Enable,
+    [switch]$GuiConfirmed
 )
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Common.ps1')
@@ -183,7 +184,7 @@ try {
         $preview += 'enforce 모드는 실제 IP/DNS 변경을 허용하므로 동료가 대상 어댑터와 프로필을 직접 확인해야 함'
         $preview += @(Get-ConfigReviewLines -Config $configObject)
     }
-    Confirm-Plan -Lines $preview -Confirmation $confirmation
+    Confirm-Plan -Lines $preview -Confirmation $confirmation -GuiConfirmed:$GuiConfirmed
 
     if ($serviceNeedsStop) {
         Stop-WifiService

@@ -293,13 +293,19 @@ function Write-InitialBackup([string]$Path, [guid]$AdapterId, $Snapshot) {
 function Invoke-NetworkRequest($Request) {
     if ($null -eq $Request -or $Request -is [array] -or
         -not (Test-Field $Request 'operation') -or
-        $Request.operation -notin @('read', 'apply', 'recover', 'restore')) { throw 'invalid_request' }
+        $Request.operation -notin @('read', 'capture', 'apply', 'recover', 'restore')) { throw 'invalid_request' }
     try { $id = [guid]$Request.adapterId }
     catch { throw 'invalid_request' }
     if ($id -eq [guid]::Empty) { throw 'invalid_request' }
     $adapter = Get-SelectedAdapter $id
     $snapshot = Get-IPv4Snapshot $adapter
     if ($Request.operation -eq 'read') { return @{ ok = $true; snapshot = $snapshot } }
+    if ($Request.operation -eq 'capture') {
+        # Initial import is read-only, but it must reject custom routes and
+        # multi-address adapters before the snapshot leaves this boundary.
+        Assert-SimpleConfiguration $adapter $snapshot
+        return @{ ok = $true; snapshot = $snapshot }
+    }
     Assert-Administrator
     $directory = Get-BackupDirectory
     $backup = Get-BackupPath

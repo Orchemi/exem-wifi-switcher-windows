@@ -6,6 +6,6 @@
     <Deterministic>true</Deterministic>
     <DebugType>none</DebugType>
     <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
-    <Version>0.1.0-alpha.1</Version>
+    <Version>0.2.0-alpha.2</Version>
   </PropertyGroup>
 </Project>

@@ -5,13 +5,20 @@ using WifiProfileSwitcher.Core;
 
 namespace WifiProfileSwitcher.Windows;
 
-internal sealed class NetworkBackend
+internal sealed class NetworkBackend(string? scriptPath = null)
 {
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
 
     public async Task<NetworkSnapshot> Read(Guid adapter, CancellationToken token)
     {
         using var reply = await Run(new { operation = "read", adapterId = adapter }, token);
+        return reply.RootElement.GetProperty("snapshot").Deserialize<NetworkSnapshot>(Json)
+            ?? throw new SafeException("network_state_unavailable");
+    }
+
+    public async Task<NetworkSnapshot> Capture(Guid adapter, CancellationToken token)
+    {
+        using var reply = await Run(new { operation = "capture", adapterId = adapter }, token);
         return reply.RootElement.GetProperty("snapshot").Deserialize<NetworkSnapshot>(Json)
             ?? throw new SafeException("network_state_unavailable");
     }
@@ -28,9 +35,9 @@ internal sealed class NetworkBackend
         using var reply = await Run(new { operation = dhcp ? "recover" : "restore", adapterId = adapter }, token);
     }
 
-    private static async Task<JsonDocument> Run(object request, CancellationToken token)
+    private async Task<JsonDocument> Run(object request, CancellationToken token)
     {
-        var script = Path.Combine(AppContext.BaseDirectory, "scripts", "network.ps1");
+        var script = scriptPath ?? Path.Combine(AppContext.BaseDirectory, "scripts", "network.ps1");
         Safety.NoReparsePoints(script);
         // Absolute Windows PowerShell path. Installation explicitly discloses process-only RemoteSigned.
         // Group Policy still takes precedence; never use Bypass or persist a machine/user policy change.

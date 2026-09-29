@@ -18,14 +18,14 @@ try {
     & dotnet publish src/WifiProfileSwitcher.Windows -c Release -r $Runtime --self-contained true -o $destination -p:DebugType=none
     if ($LASTEXITCODE -ne 0) { throw 'Windows publish failed' }
     # Explicit allowlist: no local config, diagnostics, backup, or build workspace is copied.
-    foreach ($name in @('Common.ps1', 'install.ps1', 'configure.ps1', 'uninstall.ps1')) {
+    foreach ($name in @('Common.ps1', 'install.ps1', 'configure.ps1', 'uninstall.ps1', 'service-control.ps1')) {
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot $name) -Destination (Join-Path $destination 'scripts')
     }
     foreach ($name in @('config.example.json', 'README.md', 'RULES.md', 'LICENSE')) {
         Copy-Item -LiteralPath (Join-Path $root $name) -Destination $destination
     }
     New-Item -ItemType Directory -Path (Join-Path $destination 'docs') -Force | Out-Null
-    foreach ($name in @('TESTING.md', 'PERMISSIONS.md')) {
+    foreach ($name in @('TESTING.md', 'PERMISSIONS.md', 'GUI-TESTING.md')) {
         Copy-Item -LiteralPath (Join-Path $root "docs/$name") -Destination (Join-Path $destination 'docs')
     }
     # Redistribute the runtime's own notices alongside its binaries.
@@ -65,7 +65,8 @@ try {
         # The exe is Microsoft's generated apphost (it contains runtime version strings). Our code lives in the DLLs.
         if (($assembly.Extension -eq '.dll' -and $binaryText -match $privatePattern) -or $binaryText -match $secretPattern) { throw 'Privacy check failed for application binary' }
     }
-    $zip = Join-Path $root "dist/wifi-profile-switcher-$Runtime-0.1.0-alpha.1.zip"
+    $version = ([xml](Get-Content (Join-Path $root 'Directory.Build.props') -Raw)).Project.PropertyGroup.Version
+    $zip = Join-Path $root "dist/wifi-profile-switcher-$Runtime-$version.zip"
     Compress-Archive -Path (Join-Path $destination '*') -DestinationPath $zip -Force
     $hash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText("$zip.sha256", "$hash  $([IO.Path]::GetFileName($zip))`n", [Text.UTF8Encoding]::new($false))

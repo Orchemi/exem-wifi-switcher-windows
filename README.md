@@ -1,129 +1,54 @@
-# Wi-Fi Profile Switcher for Windows
+# EXEM Wi-Fi Switcher for Windows
 
-연결된 Wi-Fi 이름에 따라 **고정 IPv4·DNS ↔ DHCP·자동 DNS**를 전환하는 Windows 백그라운드 프로그램입니다.
-창이나 트레이 아이콘을 계속 띄우지 않습니다. Wi-Fi 접속 자체는 Windows가 담당합니다.
+회사 Wi-Fi에서는 **고정 IP**, 다른 Wi-Fi에서는 **자동 IP**로 바꿔 줍니다.
 
-**현재는 동료 시험용 초기 프로토타입입니다. 실제 Windows Wi-Fi 장비에서 전환·절전 복귀는 아직 검증하지 않았습니다.**
-기본값은 설정을 바꾸지 않는 `observe` 모드입니다. `enforce`를 명시적으로 승인해야 실제 변경을 시도합니다.
+**Windows 11 x64 · 관리자 승인 필요 · 실기 검증 중인 시험판**
 
-## 내려받아 시험하기
+## 1. 다운로드하고 실행하세요
 
-Windows 11 x64, 물리 Wi-Fi 어댑터 하나, 관리자 설치 권한을 기준으로 합니다.
-ZIP에는 .NET 런타임이 포함됩니다. 개발 도구를 설치할 필요는 없습니다.
-실행 파일 옆 DLL과 `scripts` 디렉터리도 필요하므로 **ZIP 전체를 풀어 사용**하세요.
+### [Windows 설치 파일 다운로드 (.exe)](https://github.com/Orchemi/exem-wifi-switcher-windows/releases/download/v0.2.0-alpha.2/WifiProfileSwitcher-Setup-0.2.0-alpha.2.exe)
 
-1. [시험용 배포](https://github.com/Orchemi/wifi-profile-switcher-windows/releases)에서 ZIP과 SHA-256을 확인합니다.
-2. [동료 시험 절차](docs/TESTING.md)를 따라 로컬 설정을 만들고 **관찰 모드부터** 설치합니다.
-3. Wi-Fi 감지와 적용 예정 결과를 확인한 뒤 관리자가 전환을 활성화합니다.
-4. 문제가 있으면 서비스를 중지하고 문서의 DHCP 복귀 또는 백업 복원 절차를 수행합니다.
+내려받은 **Setup.exe를 더블클릭**하세요. 터미널이나 .NET 별도 설치는 필요 없습니다.
 
-공개 CI 결과와 임시 ZIP은 [Actions](https://github.com/Orchemi/wifi-profile-switcher-windows/actions)에서도 확인할 수 있습니다.
-GitHub 호스팅 실행기의 검증은 실제 무선랜 시험을 대체하지 않습니다.
+<details>
+<summary>Windows가 실행을 막나요?</summary>
 
-## 사용 흐름
+서명되지 않은 시험판이라 경고가 나올 수 있습니다. 이 저장소에서 받은 파일인지 확인하세요.
+‘Windows의 PC 보호’가 뜨면 **추가 정보 → 실행**으로 진행합니다. 회사 정책으로 차단되거나 실행 버튼이 없으면 관리자에게 승인을 요청하세요.
 
-```text
-연결 SSID 확인 → 연속 관측으로 안정화 → 프로필 선택 → 현재 구성 비교
-                                                   ↓
-                         observe: 적용 예정 상태만 기록
-                         enforce: 대상 NIC만 변경 → 재조회로 검증
-```
+[화면별 실행 안내](docs/INSTALL-GUIDE.html)를 내려받아 브라우저로 열면 자세한 이미지를 볼 수 있습니다.
 
-- 등록한 SSID는 해당 고정 IP 또는 DHCP 프로필을 사용합니다.
-- 등록하지 않은 SSID는 기본적으로 DHCP입니다. `fallback: "hold"`로 변경 보류도 가능합니다.
-- SSID를 읽지 못함·미연결·권한 거부는 외부망으로 간주하지 않습니다. 변경을 보류합니다.
-- IP, 게이트웨이, DNS를 함께 비교합니다. 적용 명령 성공만으로 완료라고 판단하지 않습니다.
-- 반복 실패와 반영 실패를 제한합니다. 사용자 또는 다른 관리 도구와 무한히 설정을 덮어쓰지 않습니다.
-- IPv6, VPN, 프록시, 방화벽, 유선 LAN은 관리하지 않습니다. IPv4 설정 전환은 망 분리나 접근 통제 기능이 아닙니다.
+</details>
 
-## 설치되는 것과 권한
+## 2. 관리자 승인에서 ‘예’를 누르세요
 
-| 대상 | 위치 / 용도 |
-|---|---|
-| 프로그램·런타임·스크립트 | `%ProgramFiles%\WifiProfileSwitcher` |
-| 사용자 설정 | `%ProgramData%\WifiProfileSwitcher\config.json` |
-| 최초 변경 전 백업 | 같은 디렉터리의 `snapshot.json` — 자동 덮어쓰기 안 함 |
-| 최근 상태 | 같은 디렉터리의 `status.json` — 네트워크 실값을 기록하지 않음 |
-| 서비스 | `WifiProfileSwitcher`, LocalSystem, 지연 자동 시작 |
+IP 설정을 바꾸는 프로그램을 설치하려면 관리자 승인이 필요합니다.
+**‘아니오’가 파란색이어도, 설치를 진행하려면 ‘예’를 선택하세요.**
 
-설치·설정·제거 스크립트는 변경 계획을 표시한 뒤 확인 문자열을 받습니다.
-설치는 관찰 모드로 저장하고 서비스를 즉시 시작하지 않습니다. 다음 부팅부터 관찰 모드로 자동 시작합니다.
-프로그램 파일은 일반 사용자 읽기만, 설정 디렉터리는 관리자와 SYSTEM만 접근하도록 제한합니다.
-네트워크 변경 권한 때문에 프로토타입 서비스는 높은 권한을 사용합니다. 조직에서 승인한 PC에서만 설치하세요.
+<img src="docs/screenshots/windows-uac.png" alt="Windows 관리자 승인 예시. 왼쪽 Yes가 승인 버튼입니다." width="560">
 
-위치 권한, PowerShell 정책, AppLocker/WDAC 등의 제한은 [권한과 해결 방법](docs/PERMISSIONS.md)에 정리했습니다.
-설치 승인 후 프로그램의 PowerShell 자식 프로세스에만 `RemoteSigned`를 지정합니다.
-컴퓨터·사용자의 영구 실행 정책은 바꾸지 않으며 그룹 정책이 우선합니다.
-정책을 강제로 해제하거나 보안 제품을 끄지 않습니다. 서비스 계정에서 SSID 조회가 막히면
-관리자 사용자 세션에서 `watch`를 실행해 비교할 수 있습니다. 이 대안은 터미널을 유지해야 하며,
-로그인 작업 자동 등록은 이번 프로토타입에 포함하지 않습니다.
+<sub>Microsoft의 Windows 화면 예시입니다. 실제 앱 이름과 게시자 표시는 다릅니다. [출처](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/)</sub>
 
-## 설정
+## 3. 회사 Wi-Fi 설정을 저장하세요
 
-`config.example.json`은 문서용 예시입니다. 실제 네트워크에 그대로 적용하지 마세요.
-`adapterId`는 로컬에서 `WifiProfileSwitcher.exe adapters`로 확인한 Wi-Fi GUID로 바꿉니다.
-고정 IP·접두사 길이·게이트웨이·DNS는 본인 장비에 배정된 값을 입력합니다.
-프로필 복사로 여러 PC에 같은 고정 IP를 배포하면 충돌합니다.
+자동으로 채워지면 값을 확인하고 **저장**을 누르세요.
+감지하지 못하면 회사 Wi-Fi 이름과 본인에게 할당된 IP·DNS를 직접 입력하세요.
 
-설정 예시의 `/24`는 서브넷 마스크 `255.255.255.0`을 뜻합니다.
-초기 버전은 단일 IPv4·기본 게이트웨이 구성만 지원합니다. 복수 주소·사용자 지정 경로는 변경을 거부합니다.
-SSID는 대소문자를 구분합니다. 잘못된 필드·중복 SSID·잘못된 IP·서브넷이 맞지 않는 게이트웨이를 검증합니다.
+<img src="docs/screenshots/setup-manual.png" alt="회사 Wi-Fi 이름, IP, 서브넷 마스크, 게이트웨이, DNS 입력 후 오른쪽 아래 저장을 누르는 화면" width="540">
 
-## 중지·복구·제거
+<sub>Windows CI에서 실행한 실제 설정 창입니다. 주소는 문서용 예시이므로 그대로 입력하지 마세요.</sub>
 
-관리자 PowerShell에서:
+## 4. ‘켜기’를 누르면 끝입니다
 
-```powershell
-Stop-Service WifiProfileSwitcher
-$app = Join-Path $env:ProgramFiles 'WifiProfileSwitcher\WifiProfileSwitcher.exe'
-& $app recover-dhcp --confirm
-# 또는 최초 백업 당시 네트워크로 돌아온 뒤:
-# & $app restore --confirm
-```
+회사 Wi-Fi에 연결한 뒤 **자동 전환 → 켜기**를 누르세요. 이후에는 창을 닫아도 동작합니다.
 
-두 복구 명령은 `RECOVER` 입력을 추가로 요구합니다. 서비스가 실행 중이면 거부합니다.
-복구는 네트워크 연결을 끊을 수 있으므로 원격 접속만 가능한 PC에서 시험하지 마세요.
-서비스를 중지하는 것만으로 현재 IP가 바뀌지는 않습니다.
+<img src="docs/screenshots/setup-saved.png" alt="설정 저장 후 자동 전환 오른쪽의 켜기 버튼" width="540">
 
-```powershell
-& (Join-Path $env:ProgramFiles 'WifiProfileSwitcher\scripts\uninstall.ps1')
-```
+<sub>Windows CI 캡처입니다. Wi-Fi 이름을 계속 읽지 못하면 설정은 저장되지만 자동 전환은 켜지지 않습니다.</sub>
 
-제거도 IP를 자동 변경하지 않습니다. 필요한 복구를 먼저 수행하세요. 상세 삭제 범위는 시험 문서를 확인하세요.
+## 끄거나 제거하려면
 
-## 개발·검증
+Setup.exe를 다시 열어 **끄기** 또는 **더 보기 → 앱 제거**를 선택하세요.
+제거해도 현재 IP는 유지됩니다. 자동 IP로 돌아가려면 제거 전에 **더 보기 → DHCP로 복구**를 사용하세요.
 
-.NET 10 SDK와 PowerShell 7을 사용합니다. Windows 앱은 macOS에서도 크로스 빌드할 수 있습니다.
-
-```sh
-dotnet test tests/WifiProfileSwitcher.Core.Tests -c Release
-dotnet build src/WifiProfileSwitcher.Windows -c Release
-pwsh -NoProfile -File scripts/check.ps1
-pwsh -NoProfile -File tests/NetworkBackend.Tests.ps1
-pwsh -NoProfile -File scripts/package.ps1
-```
-
-`src/WifiProfileSwitcher.Core`는 순수 설정 검증·판정·재시도 정책,
-`src/WifiProfileSwitcher.Windows`는 Windows SSID 조회·서비스·진단,
-`scripts/network.ps1`은 제한된 IPv4 읽기·변경·복구를 담당합니다.
-실제 설정을 명령 문자열에 끼워 넣지 않고 JSON 표준 입력으로 전달합니다.
-
-## 공개 정보와 배포 신뢰
-
-실제 설정, 백업, 원본 네트워크 출력, IP, MAC, 내부 도메인, 개인 경로는 공개하지 않습니다.
-피드백에는 `doctor`와 `status`의 상태 코드 및 시험 결과만 포함하세요. `adapters` 출력은 로컬 설정용입니다.
-자세한 기준은 [RULES.md](RULES.md)를 따릅니다. 외부 전송·텔레메트리·자동 업데이트 기능은 없습니다.
-
-초기 패키지는 Authenticode 서명되지 않습니다. Windows 또는 조직 정책이 실행을 막을 수 있습니다.
-SHA-256은 파일 일치 확인 수단이며 서명이나 안전성 보증을 대신하지 않습니다.
-원본·해시를 확인해도 조직 정책이 차단하면 관리자에게 승인을 요청하세요.
-
-## 기술 근거
-
-- [Windows 서비스와 .NET](https://learn.microsoft.com/en-us/dotnet/core/extensions/windows-service)
-- [Wi-Fi API의 위치 권한 제한과 SSID 전용 API 안내](https://learn.microsoft.com/en-us/windows/win32/nativewifi/wi-fi-access-location-changes)
-- [연결 SSID 조회](https://learn.microsoft.com/en-us/uwp/api/windows.networking.connectivity.wlanconnectionprofiledetails.getconnectedssid)
-- [IPv4 구성](https://learn.microsoft.com/en-us/powershell/module/nettcpip/new-netipaddress)
-- [DNS 설정과 자동 DNS 복원](https://learn.microsoft.com/en-us/powershell/module/dnsclient/set-dnsclientserveraddress)
-
-macOS판 [exem-wifi-switcher](https://github.com/Orchemi/exem-wifi-switcher)의 전환 정책을 바탕으로 별도 구현합니다.
+[이전 시험판에서 재설치하기 · 오류 해결](docs/MANUAL-SETUP.md) · [자세한 안내](docs/README.md)

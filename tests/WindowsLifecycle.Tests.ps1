@@ -14,15 +14,17 @@ if ((Test-Path -LiteralPath $installed) -or (Test-Path -LiteralPath $data) -or (
     throw 'Refusing to test over an existing installation.'
 }
 function Read-Host {
-    param([string]$Prompt)
-    if ($Prompt -match '\b(INSTALL|CONFIGURE|UNINSTALL)\b') { return $Matches[1] }
-    throw 'Unexpected confirmation; this test must never enable network writes.'
+    throw 'Unexpected console confirmation; GUI-confirmed lifecycle must never read stdin.'
 }
 try {
-    & (Join-Path $package 'scripts\install.ps1') -ConfigPath (Join-Path $package 'config.example.json')
+    & (Join-Path $package 'scripts\install.ps1') `
+        -ConfigPath (Join-Path $package 'config.example.json') `
+        -PackagePath $package -GuiConfirmed
     if ($LASTEXITCODE -ne 0) { throw 'Install failed' }
     # An attempted second installation must fail without deleting the first one.
-    & (Join-Path $package 'scripts\install.ps1') -ConfigPath (Join-Path $package 'config.example.json')
+    & (Join-Path $package 'scripts\install.ps1') `
+        -ConfigPath (Join-Path $package 'config.example.json') `
+        -PackagePath $package -GuiConfirmed
     if ($LASTEXITCODE -eq 0 -or -not (Test-Path -LiteralPath (Join-Path $data 'config.json'))) {
         throw 'Reinstall refusal damaged the existing installation'
     }
@@ -31,7 +33,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Installed config validation failed' }
     $config = Get-Content -LiteralPath (Join-Path $data 'config.json') -Raw | ConvertFrom-Json
     if ($config.mode -ne 'observe') { throw 'Install must force observe' }
-    Start-Service WifiProfileSwitcher
+    & (Join-Path $installed 'scripts\service-control.ps1') -Action Start -GuiConfirmed
+    if ($LASTEXITCODE -ne 0) { throw 'Service-control start failed' }
     $deadline = [DateTime]::UtcNow.AddSeconds(30)
     $status = $null
     do {
@@ -42,20 +45,23 @@ try {
     if ($null -eq $status -or $status.mode -ne 'observe' -or $status.mutationAttempted) { throw 'Observe service status missing or unsafe' }
     & $exe status
     if ($LASTEXITCODE -ne 0) { throw 'Status failed' }
-    Stop-Service WifiProfileSwitcher
-    & (Join-Path $installed 'scripts\configure.ps1') -ConfigPath (Join-Path $package 'config.example.json')
+    & (Join-Path $installed 'scripts\service-control.ps1') -Action Stop -GuiConfirmed
+    if ($LASTEXITCODE -ne 0) { throw 'Service-control stop failed' }
+    & (Join-Path $installed 'scripts\configure.ps1') `
+        -ConfigPath (Join-Path $package 'config.example.json') -GuiConfirmed
     if ($LASTEXITCODE -ne 0) { throw 'Configure failed' }
     if ((Get-Service WifiProfileSwitcher).Status -ne 'Stopped') { throw 'Configure must preserve stopped service' }
     $configPath = Join-Path $data 'config.json'
     $beforeHash = (Get-FileHash -LiteralPath $configPath).Hash
     $badConfig = Join-Path $env:RUNNER_TEMP 'invalid-wifi-config.json'
     [IO.File]::WriteAllText($badConfig, '{"adapterId":"invalid"}')
-    & (Join-Path $installed 'scripts\configure.ps1') -ConfigPath $badConfig
+    & (Join-Path $installed 'scripts\configure.ps1') `
+        -ConfigPath $badConfig -GuiConfirmed
     if ($LASTEXITCODE -eq 0 -or (Get-FileHash -LiteralPath $configPath).Hash -ne $beforeHash) {
         throw 'Invalid configuration did not preserve the previous file'
     }
     Remove-Item -LiteralPath $badConfig
-    & (Join-Path $installed 'scripts\uninstall.ps1')
+    & (Join-Path $package 'scripts\uninstall.ps1') -GuiConfirmed
     if ($LASTEXITCODE -ne 0) { throw 'Uninstall failed' }
     if ((Test-Path -LiteralPath $installed) -or (Test-Path -LiteralPath $data) -or (Get-Service WifiProfileSwitcher -ErrorAction SilentlyContinue)) {
         throw 'Uninstall left managed files or service'

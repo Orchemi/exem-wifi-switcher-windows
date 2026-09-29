@@ -3,7 +3,8 @@
 [CmdletBinding()]
 param(
     [string]$ConfigPath,
-    [string]$PackagePath
+    [string]$PackagePath,
+    [switch]$GuiConfirmed
 )
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Common.ps1')
@@ -90,7 +91,7 @@ try {
 
     $sourceScriptsRoot = Join-Path -Path $packageRoot -ChildPath 'scripts'
     Assert-ExistingDirectory -Path $sourceScriptsRoot
-    $runtimeScriptNames = @('network.ps1', 'Common.ps1', 'install.ps1', 'configure.ps1', 'uninstall.ps1')
+    $runtimeScriptNames = @('network.ps1', 'Common.ps1', 'install.ps1', 'configure.ps1', 'uninstall.ps1', 'service-control.ps1')
     foreach ($scriptName in $runtimeScriptNames) {
         Assert-RegularFile -Path (Join-Path -Path $sourceScriptsRoot -ChildPath $scriptName)
     }
@@ -124,7 +125,7 @@ try {
         '런타임 PowerShell은 조직 승인 범위의 자식 프로세스에만 -ExecutionPolicy RemoteSigned를 사용하며 영구 정책·GPO는 변경하지 않음',
         '패키지와 설정 값은 실행 전에 동료가 직접 검토해야 함'
     )
-    Confirm-Plan -Lines $preview -Confirmation INSTALL
+    Confirm-Plan -Lines $preview -Confirmation INSTALL -GuiConfirmed:$GuiConfirmed
 
     New-Item -ItemType Directory -Path $installRoot -Force:$false -ErrorAction Stop | Out-Null
     $createdInstallRoot = $true

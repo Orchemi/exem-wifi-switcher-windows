@@ -17,7 +17,7 @@
 standalone: true
 사유: 기존 원격 브랜치가 없는 신규 프로젝트의 초기 공개 작업이다.
 초기 검증과 개인정보 검사를 마친 파일만 명시적으로 stage하여 main의 최초 커밋을 만들고,
-Orchemi/wifi-profile-switcher-windows에 push한다. 이후 기능 변경은 별도 브랜치/PR을 사용한다.
+Orchemi/exem-wifi-switcher-windows에 push한다. 이후 기능 변경은 별도 브랜치/PR을 사용한다.
 
 ## 검증
 
