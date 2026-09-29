@@ -115,3 +115,7 @@ SHA-256은 파일 일치 확인 수단이며 서명이나 안전성 보증을 �
 - [DNS 설정과 자동 DNS 복원](https://learn.microsoft.com/en-us/powershell/module/dnsclient/set-dnsclientserveraddress)
 
 macOS판 [exem-wifi-switcher](https://github.com/Orchemi/exem-wifi-switcher)의 전환 정책을 바탕으로 별도 구현합니다.
+
+## Windows 버전
+
+프로젝트의 Windows API 대상은 Windows 10 빌드 19041입니다. Windows 11만 허용하는 검사는 없습니다. 배포 파일은 x64용이며, 모든 Windows 버전에서의 동작을 보증하지 않습니다. .NET 10의 공식 지원 범위는 [지원 OS 목록](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)을 참고하세요.

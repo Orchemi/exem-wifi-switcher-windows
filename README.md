@@ -2,7 +2,7 @@
 
 회사 Wi-Fi에서는 **고정 IP**, 다른 Wi-Fi에서는 **자동 IP**로 바꿔 줍니다.
 
-**Windows 11 x64 · 관리자 승인 필요 · 실기 검증 중인 시험판**
+**x64 · 관리자 승인 필요**
 
 ## 1. 다운로드하고 실행하세요
 
@@ -13,10 +13,18 @@
 <details>
 <summary>Windows가 실행을 막나요?</summary>
 
-서명되지 않은 시험판이라 경고가 나올 수 있습니다. 이 저장소에서 받은 파일인지 확인하세요.
-‘Windows의 PC 보호’가 뜨면 **추가 정보 → 실행**으로 진행합니다. 회사 정책으로 차단되거나 실행 버튼이 없으면 관리자에게 승인을 요청하세요.
+이 저장소에서 받은 파일인지 확인한 뒤, 아래 순서로 누르세요.
 
-[화면별 실행 안내](docs/INSTALL-GUIDE.html)를 내려받아 브라우저로 열면 자세한 이미지를 볼 수 있습니다.
+**① 추가 정보 (More info)**
+
+<img src="docs/screenshots/windows-more-info.png" alt="Windows의 PC 보호 경고에서 추가 정보 링크를 누르세요" width="440">
+
+**② 실행 (Run anyway)**
+
+<img src="docs/screenshots/windows-run-anyway.png" alt="추가 정보를 펼친 뒤 아래쪽 실행 버튼을 누르세요" width="440">
+
+[Windows 경고 화면 예시](docs/screenshots/README.md)입니다. 실제 파일 이름은 다릅니다.
+실행 버튼이 없거나 회사 정책으로 차단되면 관리자에게 승인을 요청하세요.
 
 </details>
 
@@ -27,7 +35,6 @@ IP 설정을 바꾸는 프로그램을 설치하려면 관리자 승인이 필�
 
 <img src="docs/screenshots/windows-uac.png" alt="Windows 관리자 승인 예시. 왼쪽 Yes가 승인 버튼입니다." width="560">
 
-<sub>Microsoft의 Windows 화면 예시입니다. 실제 앱 이름과 게시자 표시는 다릅니다. [출처](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/)</sub>
 
 ## 3. 회사 Wi-Fi 설정을 저장하세요
 
@@ -36,7 +43,6 @@ IP 설정을 바꾸는 프로그램을 설치하려면 관리자 승인이 필�
 
 <img src="docs/screenshots/setup-manual.png" alt="회사 Wi-Fi 이름, IP, 서브넷 마스크, 게이트웨이, DNS 입력 후 오른쪽 아래 저장을 누르는 화면" width="540">
 
-<sub>Windows CI에서 실행한 실제 설정 창입니다. 주소는 문서용 예시이므로 그대로 입력하지 마세요.</sub>
 
 ## 4. ‘켜기’를 누르면 끝입니다
 
@@ -44,7 +50,6 @@ IP 설정을 바꾸는 프로그램을 설치하려면 관리자 승인이 필�
 
 <img src="docs/screenshots/setup-saved.png" alt="설정 저장 후 자동 전환 오른쪽의 켜기 버튼" width="540">
 
-<sub>Windows CI 캡처입니다. Wi-Fi 이름을 계속 읽지 못하면 설정은 저장되지만 자동 전환은 켜지지 않습니다.</sub>
 
 ## 끄거나 제거하려면
 
