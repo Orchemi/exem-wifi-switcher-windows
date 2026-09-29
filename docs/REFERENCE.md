@@ -115,4 +115,3 @@ SHA-256은 파일 일치 확인 수단이며 서명이나 안전성 보증을 �
 - [DNS 설정과 자동 DNS 복원](https://learn.microsoft.com/en-us/powershell/module/dnsclient/set-dnsclientserveraddress)
 
 macOS판 [exem-wifi-switcher](https://github.com/Orchemi/exem-wifi-switcher)의 전환 정책을 바탕으로 별도 구현합니다.
-

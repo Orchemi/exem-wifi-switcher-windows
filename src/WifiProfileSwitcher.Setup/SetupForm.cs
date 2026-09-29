@@ -39,8 +39,8 @@ internal sealed class SetupForm : Form
         fields.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, spec.LabelWidth)); fields.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         for (var i = 0; i < 6; i++) fields.RowStyles.Add(new RowStyle(SizeType.Absolute, spec.RowHeight));
         var wifiRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty };
-        wifiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); wifiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 42));
-        wifiRow.Controls.Add(ssid, 0, 0); detect.Anchor = AnchorStyles.Right; detect.Margin = new Padding(8, 0, 0, 0); wifiRow.Controls.Add(detect, 1, 0);
+        wifiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); wifiRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 56));
+        wifiRow.Controls.Add(ssid, 0, 0); detect.AutoSize = false; detect.Size = new Size(44, 28); detect.TextAlign = ContentAlignment.MiddleCenter; detect.Anchor = AnchorStyles.Right; detect.Margin = new Padding(8, 0, 0, 0); wifiRow.Controls.Add(detect, 1, 0);
         Field(fields, spec.AdapterLabel, adapter, 0); Field(fields, spec.SsidLabel, wifiRow, 1);
         Field(fields, spec.AddressLabel, address, 2); Field(fields, spec.SubnetLabel, subnet, 3); Field(fields, spec.GatewayLabel, gateway, 4); Field(fields, spec.DnsLabel, dns, 5);
         root.Controls.Add(fields, 0, 1);
