@@ -110,7 +110,8 @@ try {
             $_.Name -eq 'WifiProfileSwitcher.exe' -or
             $_.Extension -eq '.dll' -or
             $_.Name -eq 'WifiProfileSwitcher.deps.json' -or
-            $_.Name -eq 'WifiProfileSwitcher.runtimeconfig.json'
+            $_.Name -eq 'WifiProfileSwitcher.runtimeconfig.json' -or
+            $_.Name -in @('LICENSE', 'DOTNET-LICENSE.txt', 'THIRD-PARTY-NOTICES.txt', 'WINDOWS-SDK-NOTICE.txt')
         })
 
     $preview = @(
