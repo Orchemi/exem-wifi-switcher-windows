@@ -13,15 +13,15 @@ internal static class Program
             if (args is ["--capture-ui", var directory])
             {
                 Directory.CreateDirectory(directory);
-                foreach (var stored in new[] { false, true })
+                foreach (var scenario in new[] { (Stored: false, Blocked: false), (Stored: true, Blocked: false), (Stored: true, Blocked: true) })
                 {
                     using var preview = new SetupForm(null, preview: true);
-                    preview.LoadPreview(stored);
+                    preview.LoadPreview(scenario.Stored, scenario.Blocked);
                     preview.Show();
                     Application.DoEvents();
                     using var bitmap = new Bitmap(preview.Width, preview.Height);
                     preview.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
-                    using var output = new FileStream(Path.Combine(directory, stored ? "native-example-saved.png" : "native-example-manual.png"), FileMode.CreateNew);
+                    using var output = new FileStream(Path.Combine(directory, scenario.Blocked ? "native-example-blocked.png" : scenario.Stored ? "native-example-saved.png" : "native-example-manual.png"), FileMode.CreateNew);
                     bitmap.Save(output, System.Drawing.Imaging.ImageFormat.Png);
                     preview.Close();
                 }

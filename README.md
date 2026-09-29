@@ -6,7 +6,7 @@
 
 ## 1. 다운로드하고 실행하세요
 
-### [Windows 설치 파일 다운로드 (.exe)](https://github.com/Orchemi/exem-wifi-switcher-windows/releases/download/v0.2.0-alpha.2/WifiProfileSwitcher-Setup-0.2.0-alpha.2.exe)
+### [Windows 설치 파일 다운로드 (.exe)](https://github.com/Orchemi/exem-wifi-switcher-windows/releases/download/v0.2.0-alpha.3/WifiProfileSwitcher-Setup-0.2.0-alpha.3.exe)
 
 내려받은 **Setup.exe를 더블클릭**하세요. 터미널이나 .NET 별도 설치는 필요 없습니다.
 
@@ -34,19 +34,19 @@ IP 설정을 바꾸는 프로그램을 설치하려면 관리자 승인이 필�
 <img src="docs/screenshots/windows-uac.png" alt="Windows 관리자 승인 예시. 왼쪽 Yes가 승인 버튼입니다." width="560">
 
 
-## 3. 회사 Wi-Fi 설정을 저장하세요
+## 3. 설정을 확인하고 ‘저장하고 시작’을 누르세요
 
-자동으로 채워지면 값을 확인하고 **저장**을 누르세요.
+자동으로 채워지면 값을 확인하고 **저장하고 시작**을 누르세요.
 감지하지 못하면 회사 Wi-Fi 이름과 본인에게 할당된 IP·DNS를 직접 입력하세요.
 
-<img src="docs/screenshots/setup-manual.png" alt="회사 Wi-Fi 이름, IP, 서브넷 마스크, 게이트웨이, DNS 입력 후 오른쪽 아래 저장을 누르는 화면" width="540">
+<img src="docs/screenshots/setup-manual.png" alt="회사 Wi-Fi 이름, IP, 서브넷 마스크, 게이트웨이, DNS 입력 후 오른쪽 아래 저장하고 시작을 누르는 화면" width="540">
 
 
-## 4. ‘켜기’를 누르면 끝입니다
+## 4. 자동 전환이 시작됩니다
 
-회사 Wi-Fi에 연결한 뒤 **자동 전환 → 켜기**를 누르세요. 이후에는 창을 닫아도 동작합니다.
+회사 Wi-Fi 감지가 확인되면 자동으로 시작합니다. **켜짐**을 확인한 뒤 창을 닫으세요.
 
-<img src="docs/screenshots/setup-saved.png" alt="설정 저장 후 자동 전환 오른쪽의 켜기 버튼" width="540">
+<img src="docs/screenshots/setup-saved.png" alt="설정 저장 후 자동 전환이 켜진 화면" width="540">
 
 
 ## 끄거나 제거하려면

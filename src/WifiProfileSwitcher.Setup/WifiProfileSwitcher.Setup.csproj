@@ -11,6 +11,7 @@
   <ItemGroup>
     <EmbeddedResource Include="UiSpec.json" LogicalName="ui-spec.json" />
     <ProjectReference Include="../WifiProfileSwitcher.Core/WifiProfileSwitcher.Core.csproj" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.12" />
     <Compile Include="../WifiProfileSwitcher.Windows/WifiReader.cs" Link="Windows/WifiReader.cs" />
     <Compile Include="../WifiProfileSwitcher.Windows/NetworkBackend.cs" Link="Windows/NetworkBackend.cs" />
     <Compile Include="../WifiProfileSwitcher.Windows/Safety.cs" Link="Windows/Safety.cs" />

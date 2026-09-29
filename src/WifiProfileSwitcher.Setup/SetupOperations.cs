@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.ServiceProcess;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Text.Json;
@@ -149,6 +150,16 @@ internal sealed class SetupOperations(SetupPayload payload)
                 return;
         }
         throw new SafeException("service_observation_failed");
+    }
+
+    public static bool? ServiceIsRunning()
+    {
+        try
+        {
+            using var service = new ServiceController("WifiProfileSwitcher");
+            return service.Status == ServiceControllerStatus.Running;
+        }
+        catch { return null; }
     }
 
     public static ServiceObservation? ReadStatus()

@@ -15,6 +15,14 @@ internal static class SetupMessages
         _ => "setup_failed"
     };
 
+    public static string StartFailure(Exception error) => Code(error) switch
+    {
+        "ssid_not_configured" => "회사 Wi-Fi에 연결한 뒤 ‘저장하고 시작’을 다시 누르세요.",
+        "service_observation_failed" or "location_or_policy_denied" or "wifi_access_denied" or "ssid_unavailable" or "ssid_api_unavailable" or "wifi_disconnected"
+            => "Wi-Fi를 확인하지 못해 자동 전환을 시작하지 못했습니다. 연결·권한을 확인한 뒤 다시 시도하세요.",
+        _ => "자동 전환을 시작하지 못했습니다. ‘더 보기’에서 오류를 확인한 뒤 다시 시도하세요."
+    };
+
     public static string Short(Exception error) => Code(error) switch
     {
         "manual_ssid_required" => "회사 Wi-Fi 이름을 입력해 주세요.",
