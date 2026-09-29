@@ -18,12 +18,17 @@ function Assert-Condition {
     }
 }
 
-foreach ($name in @('Common.ps1', 'install.ps1', 'configure.ps1', 'uninstall.ps1')) {
+foreach ($name in @('Common.ps1', 'install.ps1', 'configure.ps1', 'uninstall.ps1', 'service-control.ps1')) {
     $path = Join-Path $root ('scripts\' + $name)
     $tokens = $null
     $errors = $null
     [System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$errors) | Out-Null
     Assert-Condition -Condition ($errors.Count -eq 0) -Message ('PowerShell 구문 오류: ' + $name)
+
+    if ($name -ne 'Common.ps1') {
+        $command = Get-Command -Name $path -ErrorAction Stop
+        Assert-Condition -Condition $command.Parameters.ContainsKey('GuiConfirmed') -Message ('GUI 확인 스위치가 없습니다: ' + $name)
+    }
 }
 
 . (Join-Path $root 'scripts\Common.ps1')
@@ -55,6 +60,23 @@ try {
     $observe = '{"mode":"enforce"}' | ConvertFrom-Json
     $observe = Set-ConfigMode -Config $observe -Mode observe
     Assert-Condition -Condition ($observe.mode -eq 'observe') -Message '관찰 모드 강제가 동작하지 않습니다.'
+
+    # A GUI caller may suppress Read-Host only after showing the same plan.
+    # Any accidental prompt is a test failure.
+    function Read-Host {
+        throw 'GUI confirmation unexpectedly asked for console input.'
+    }
+    Confirm-Plan -Lines @('GUI confirmation test') -Confirmation CONFIGURE -GuiConfirmed
+
+    # CLI callers still get the typed confirmation path by default.
+    $script:promptCount = 0
+    function Read-Host {
+        param([string]$Prompt)
+        $script:promptCount++
+        return 'CONFIGURE'
+    }
+    Confirm-Plan -Lines @('CLI confirmation test') -Confirmation CONFIGURE
+    Assert-Condition -Condition ($script:promptCount -eq 1) -Message 'CLI 기본 확인 입력을 건너뛰었습니다.'
 
     $atomic = Join-Path $probeRoot 'atomic.json'
     Write-TextFileAtomic -Path $atomic -Content '{"ok":true}'

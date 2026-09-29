@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>WifiProfileSwitcher-Setup</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="UiSpec.json" LogicalName="ui-spec.json" />
+    <ProjectReference Include="../WifiProfileSwitcher.Core/WifiProfileSwitcher.Core.csproj" />
+    <Compile Include="../WifiProfileSwitcher.Windows/WifiReader.cs" Link="Windows/WifiReader.cs" />
+    <Compile Include="../WifiProfileSwitcher.Windows/NetworkBackend.cs" Link="Windows/NetworkBackend.cs" />
+    <Compile Include="../WifiProfileSwitcher.Windows/Safety.cs" Link="Windows/Safety.cs" />
+    <EmbeddedResource Include="$(DesktopLicense)" LogicalName="desktop-license.txt" Condition="'$(DesktopLicense)' != ''" />
+    <EmbeddedResource Include="$(SetupPayload)" LogicalName="setup-payload.zip" Condition="'$(SetupPayload)' != ''" />
+  </ItemGroup>
+  <Target Name="RequireSetupPayload" BeforeTargets="Publish">
+    <Error Condition="'$(DesktopLicense)' == '' Or !Exists('$(DesktopLicense)')" Text="DesktopLicense must point to the Windows Desktop runtime LICENSE." />
+    <Error Condition="'$(SetupPayload)' == '' Or !Exists('$(SetupPayload)')" Text="SetupPayload must point to a verified runtime ZIP." />
+  </Target>
+</Project>

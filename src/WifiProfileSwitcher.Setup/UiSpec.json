@@ -1,0 +1,20 @@
+{
+  "title": "Wi-Fi Switcher 설정",
+  "width": 540,
+  "height": 520,
+  "padding": 24,
+  "labelWidth": 112,
+  "rowHeight": 36,
+  "background": "#202020",
+  "surface": "#303030",
+  "text": "#EEEEEE",
+  "muted": "#B7B7B7",
+  "accent": "#60CDFF",
+  "hint": "회사 Wi-Fi는 고정 IP, 다른 Wi-Fi는 자동 IP를 사용합니다.",
+  "adapterLabel": "Wi-Fi 어댑터",
+  "ssidLabel": "회사 Wi-Fi 이름",
+  "addressLabel": "IP 주소",
+  "subnetLabel": "서브넷 마스크",
+  "gatewayLabel": "게이트웨이",
+  "dnsLabel": "DNS 서버"
+}

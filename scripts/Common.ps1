@@ -510,7 +510,8 @@ function Assert-ExecutableValidation {
 function Confirm-Plan {
     param(
         [Parameter(Mandatory = $true)][string[]]$Lines,
-        [Parameter(Mandatory = $true)][ValidateSet('INSTALL', 'CONFIGURE', 'ENABLE', 'UNINSTALL')][string]$Confirmation
+        [Parameter(Mandatory = $true)][ValidateSet('INSTALL', 'CONFIGURE', 'ENABLE', 'UNINSTALL', 'START', 'STOP')][string]$Confirmation,
+        [switch]$GuiConfirmed
     )
 
     Write-Host ''
@@ -519,6 +520,16 @@ function Confirm-Plan {
         Write-Host ('  - ' + $line)
     }
     Write-Host ''
+
+    # The WinForms setup host displays the same plan and collects the user's
+    # confirmation before invoking this script. This switch only suppresses
+    # Read-Host; it does not skip the administrator, path, ACL, or validation
+    # checks performed by the caller. CLI callers retain the typed confirmation.
+    if ($GuiConfirmed) {
+        Write-Info ('GUI 확인을 받았습니다: {0}' -f $Confirmation)
+        return
+    }
+
     $answer = Read-Host (('계속하려면 {0} 을(를) 그대로 입력하십시오' -f $Confirmation))
     if ($answer -cne $Confirmation) {
         Fail '확인이 일치하지 않아 변경하지 않았습니다.'

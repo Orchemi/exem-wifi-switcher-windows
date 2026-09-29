@@ -180,6 +180,31 @@ function Invoke-Tests {
     $script:Addresses.ActiveStore = @([pscustomobject]@{ IPAddress = '192.0.2.10'; PrefixLength = 24; PrefixOrigin = 'Manual'; AddressState = 'Tentative' })
     Assert-True (-not (Get-IPv4Snapshot $script:Adapter).addressesReady) 'tentative address must not be considered ready'
 
+    # Initial capture is read-only, but performs the same simple-network
+    # preflight as an apply so an imported profile cannot hide custom routes.
+    Reset-MockState
+    $script:IpInterface = [pscustomobject]@{ Dhcp = 'Disabled' }
+    $script:Addresses.ActiveStore = @([pscustomobject]@{ IPAddress = '192.0.2.10'; PrefixLength = 24; PrefixOrigin = 'Manual'; AddressState = 'Preferred' })
+    $script:Routes.ActiveStore = @([pscustomobject]@{ DestinationPrefix = '0.0.0.0/0'; NextHop = '192.0.2.1'; Protocol = 'Static' })
+    $capture = Invoke-NetworkRequest @{ operation = 'capture'; adapterId = $script:AdapterId.ToString() }
+    Assert-True $capture.ok 'capture returns a usable manual snapshot'
+    Assert-Equal $capture.snapshot.addresses[0] '192.0.2.10' 'capture returns the selected adapter address'
+    Assert-Equal (Get-CallCount 'Set-NetIPInterface') 0 'capture never changes DHCP state'
+    Assert-Equal (Get-CallCount 'New-NetIPAddress') 0 'capture never creates an address'
+    Assert-Equal (Get-CallCount 'Set-DnsClientServerAddress') 0 'capture never changes DNS'
+    Assert-Equal (Get-CallCount 'Remove-NetIPAddress') 0 'capture never removes an address'
+
+    Reset-MockState
+    $script:IpInterface = [pscustomobject]@{ Dhcp = 'Disabled' }
+    $script:Addresses.ActiveStore = @([pscustomobject]@{ IPAddress = '192.0.2.10'; PrefixLength = 24; PrefixOrigin = 'Manual'; AddressState = 'Preferred' })
+    $script:Routes.ActiveStore = @(
+        [pscustomobject]@{ DestinationPrefix = '0.0.0.0/0'; NextHop = '192.0.2.1'; Protocol = 'Static' },
+        [pscustomobject]@{ DestinationPrefix = '198.51.100.0/24'; NextHop = '192.0.2.1'; Protocol = 'Static' }
+    )
+    Assert-Code { Invoke-NetworkRequest @{ operation = 'capture'; adapterId = $script:AdapterId.ToString() } } 'complex_network_configuration'
+    Assert-Equal (Get-CallCount 'Set-NetIPInterface') 0 'unsupported capture state never changes DHCP state'
+    Assert-Equal (Get-CallCount 'Remove-NetRoute') 0 'unsupported capture state never removes routes'
+
     # Static conversion removes only IPv4 manual addresses and default routes from both stores.
     Reset-MockState
     $script:Addresses.PersistentStore = @([pscustomobject]@{ PrefixOrigin = 'Manual'; IPAddress = '192.0.2.20' })

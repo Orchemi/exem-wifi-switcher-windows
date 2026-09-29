@@ -1,7 +1,9 @@
 ﻿#requires -Version 5.1
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$GuiConfirmed
+)
 
 . (Join-Path -Path $PSScriptRoot -ChildPath 'Common.ps1')
 
@@ -46,7 +48,7 @@ try {
         '제거 전에 필요하면 서비스 중지 후 recover-dhcp 또는 restore를 관리자가 직접 실행해야 함',
         '제거 후에는 자동 전환 서비스가 없어짐'
     )
-    Confirm-Plan -Lines $preview -Confirmation UNINSTALL
+    Confirm-Plan -Lines $preview -Confirmation UNINSTALL -GuiConfirmed:$GuiConfirmed
 
     if ($null -ne $service) {
         Stop-WifiService -IgnoreMissing
