@@ -1,0 +1,50 @@
+name: Prototype checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Source and script checks
+        shell: pwsh
+        run: ./scripts/check.ps1
+      - name: Core tests
+        run: dotnet test tests/WifiProfileSwitcher.Core.Tests -c Release
+      - name: Mocked network backend tests (no network changes)
+        shell: pwsh
+        run: ./tests/NetworkBackend.Tests.ps1
+      - name: Windows package
+        shell: pwsh
+        run: ./scripts/package.ps1
+      - name: Read-only Windows smoke test
+        shell: pwsh
+        run: |
+          & ./dist/win-x64/WifiProfileSwitcher.exe help
+          if ($LASTEXITCODE -ne 0) { throw 'help failed' }
+          & ./dist/win-x64/WifiProfileSwitcher.exe validate --config ./config.example.json
+          if ($LASTEXITCODE -ne 0) { throw 'validate failed' }
+          & ./dist/win-x64/WifiProfileSwitcher.exe doctor
+          if ($LASTEXITCODE -ne 0) { throw 'doctor failed' }
+          & ./dist/win-x64/WifiProfileSwitcher.exe observe --config ./config.example.json
+          if ($LASTEXITCODE -ne 0) { throw 'observe failed' }
+      - name: Windows PowerShell 5.1 backend tests
+        shell: powershell
+        run: ./tests/NetworkBackend.Tests.ps1
+      - name: Protected installation and observe-only service lifecycle
+        shell: powershell
+        run: ./tests/WindowsLifecycle.Tests.ps1 -PackagePath ./dist/win-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-prototype-x64
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          retention-days: 14

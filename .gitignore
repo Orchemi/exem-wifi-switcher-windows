@@ -1,0 +1,17 @@
+**/bin/
+**/obj/
+dist/
+artifacts/
+.vs/
+.idea/
+.DS_Store
+*.user
+*.pdb
+*.log
+config.json
+*.local.json
+backup*.json
+snapshot*.json
+status.json
+.env*
+!config.example.json
