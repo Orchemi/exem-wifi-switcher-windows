@@ -268,7 +268,10 @@ function Protect-Directory {
     if ($AllowUsersRead) {
         $rules += '*S-1-5-32-545:(OI)(CI)(RX)'
     }
-    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments (@('/inheritance:r', '/setowner', '*S-1-5-32-544', '/grant:r') + $rules)
+    # icacls owner changes cannot be combined with DACL operations in one invocation.
+    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments (@('/grant:r') + $rules)
+    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments @('/inheritance:r')
+    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments @('/setowner', '*S-1-5-32-544')
     Assert-ProtectedAcl -Path $Path -AllowUsersRead:$AllowUsersRead
 }
 
@@ -286,7 +289,10 @@ function Protect-File {
     if ($AllowUsersRead) {
         $rules += '*S-1-5-32-545:RX'
     }
-    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments (@('/inheritance:r', '/setowner', '*S-1-5-32-544', '/grant:r') + $rules)
+    # icacls owner changes cannot be combined with DACL operations in one invocation.
+    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments (@('/grant:r') + $rules)
+    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments @('/inheritance:r')
+    Invoke-Icacls -Path (Get-CanonicalPath -Path $Path) -Arguments @('/setowner', '*S-1-5-32-544')
 }
 
 function Copy-SafeFile {
