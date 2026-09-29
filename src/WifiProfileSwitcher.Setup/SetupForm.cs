@@ -274,7 +274,7 @@ internal sealed class SetupForm : Form
         filling = true;
         adapter.Items.Add(new AdapterItem(Guid.Parse("11111111-1111-4111-8111-111111111111"), "Wi-Fi")); adapter.SelectedIndex = 0;
         filling = false;
-        var config = ManualProfileInput.Create(((AdapterItem)adapter.SelectedItem!).Id, "Example-Office", "192.0.2.10", "255.255.255.0", "192.0.2.1", "192.0.2.53, 198.51.100.53");
+        var config = ManualProfileInput.Create(((AdapterItem)adapter.SelectedItem!).Id, "EXEM", "192.0.2.10", "255.255.255.0", "192.0.2.1", "192.0.2.53, 198.51.100.53");
         if (stored) saved = config;
         Fill(config); dirty = !stored;
         status.Text = stored ? "저장했습니다. 자동 전환은 ‘켜기’로 시작하세요." : "자동 감지 실패. 회사 Wi-Fi와 IP를 직접 입력해 주세요.";
